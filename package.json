@@ -71,6 +71,7 @@
     "redux": "^3.3.1",
     "redux-devtools": "^3.1.1",
     "redux-immutable": "^3.0.6",
+    "redux-undo": "^1.0.0-beta3",
     "sinon": "^1.17.2",
     "sinon-chai": "^2.8.0",
     "string.prototype.startswith": "^0.2.0",
