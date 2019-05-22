@@ -1,69 +1,58 @@
 'use strict';
 var React = require('react'),
     Property = require('./Property'),
-    Base = require('../../model/primitives/marks/Symbol');
+    primTypes = require('../../constants/primTypes'),
+    Symbol = require('../../store/factory/marks/Symbol');
 
-var Symbol = React.createClass({
+var SymbolInspector = React.createClass({
+  propTypes: {
+    primId: React.PropTypes.number.isRequired,
+    primType: primTypes.isRequired
+  },
+
   render: function() {
-    var props = this.props,
-        primitive = props.primitive,
-        update = primitive.properties.update;
-
+    var props = this.props;
     return (
       <div>
+        <div className="property-group">
+          <h3>Position</h3>
 
-        <h3>Position</h3>
+          <Property name="x" label="X" type="number" canDrop={true} {...props} />
 
-        <Property name="x" label="X" type="number"
-          primitive={primitive} canDrop={true}
-          scale={update.x.scale} field={update.x.field}
-          signal={update.x.signal} />
+          <Property name="y" label="Y" type="number" canDrop={true} {...props} />
+        </div>
 
-        <Property name="y" label="Y" type="number"
-          primitive={primitive} canDrop={true}
-          scale={update.y.scale} field={update.y.field}
-          signal={update.y.signal} />
+        <div className="property-group">
+          <h3>Geometry</h3>
 
-        <h3>Geometry</h3>
+          <Property name="shape" label="Shape" type="select" opts={Symbol.SHAPES}
+            canDrop={true} {...props} />
 
-        <Property name="size" label="Size" type="number"
-          primitive={primitive} canDrop={true}
-          scale={update.size.scale} field={update.size.field}
-          signal={update.size.signal} />
+          <Property name="size" label="Size" type="number" canDrop={true} {...props} />
 
-        <Property name="shape" label="Shape" primitive={primitive}
-          type="select" opts={Base.SHAPES} canDrop={true}
-          scale={update.shape.scale} field={update.shape.field}
-          signal={update.shape.signal} />
+        </div>
 
-        <h3>Fill</h3>
+        <div className="property-group">
+          <h3>Fill</h3>
 
-        <Property name="fill" label="Color" type="color"
-          primitive={primitive} canDrop={true}
-          scale={update.fill.scale} field={update.fill.field}
-          signal={update.fill.signal} />
+          <Property name="fill" label="Color" type="color" canDrop={true} {...props} />
 
-        <Property name="fillOpacity" label="Opacity"
-          type="range" min="0" max="1" step="0.05"
-          primitive={primitive} canDrop={true}
-          scale={update.fillOpacity.scale} field={update.fillOpacity.field}
-          signal={update.fillOpacity.signal} />
+          <Property name="fillOpacity" label="Opacity" type="range"
+            min="0" max="1" step="0.05" canDrop={true} {...props} />
 
-        <h3>Stroke</h3>
+        </div>
 
-        <Property name="stroke" label="Color" type="color"
-          primitive={primitive} canDrop={true}
-          scale={update.stroke.scale} field={update.stroke.field}
-          signal={update.stroke.signal} />
+        <div className="property-group">
+          <h3>Stroke</h3>
 
-        <Property name="strokeWidth" label="Width"
-          type="range" min="0" max="10" step="0.25"
-          primitive={primitive} canDrop={true}
-          scale={update.strokeWidth.scale} field={update.strokeWidth.field}
-          signal={update.strokeWidth.signal} />
+          <Property name="stroke" label="Color" type="color" canDrop={true} {...props} />
+
+          <Property name="strokeWidth" label="Width" type="range"
+            min="0" max="10" step="0.25" canDrop={true} {...props} />
+        </div>
       </div>
     );
   }
 });
 
-module.exports = Symbol;
+module.exports = SymbolInspector;

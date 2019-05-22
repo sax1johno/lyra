@@ -1,42 +1,37 @@
 /* eslint no-unused-expressions: 0 */
 'use strict';
 
+require('../scss/app.scss');
+
 // Additional requires to polyfill + browserify package.
 require('array.prototype.find');
 require('string.prototype.startswith');
 require('./transforms');
 
+// Initialize the Redux store
+var store = global.store = require('./store');
+
 // Initialize the Model.
-var model = require('./model');
-model.init();
+var ctrl = global.ctrl = require('./ctrl');
 
-// Initialize components
-var ui = require('./components');
+// Set up the listeners that connect the ctrl to the store
+var listeners = require('./store/listeners');
 
-var g = model.Scene.child('marks.group'),
-    g2 = g.child('marks.group'),
-    g3 = g2.child('marks.group'),
-    p = model.pipeline('cars'),
-    p2 = model.pipeline('jobs'),
-    p3 = model.pipeline('gapminder');
+// Bind the listener that will flow changes from the redux store into Vega.
+store.subscribe(listeners.createStoreListener(store, ctrl));
 
-// Pre-populate state with one rect, one symbol, one text & one line mark
-g3.child('marks.rect');
-g.child('marks.symbol');
-g2.child('marks.line');
-g.child('marks.text');
-g.child('marks.area');
+// Initializes the Lyra ctrl with a new Scene primitive.
+var createScene = require('./actions/sceneActions').createScene,
+    Mark = require('./store/factory/Mark'),
+    addMark = require('./actions/markActions').addMark;
 
-Promise.all([
-  p._source.init({url: '/data/cars.json'}),
-  p2._source.init({url: '/data/jobs.json'}),
-  p3._source.init({url: '/data/gapminder.json'})
-]).then(function() {
-  return model.parse();
-}).then(function() {
-  ui.forceUpdate();
-});
+store.dispatch(createScene({
+  width: 640,
+  height: 360
+}));
 
-// Expose model, store and Sidebars globally (via `window`) for debugging
-global.model = model;
-global.store = require('./store');
+store.dispatch(addMark(Mark('group', {_parent: 1})));
+
+require('./components');
+
+store.dispatch(require('./actions/historyActions').clearHistory());

@@ -7,7 +7,7 @@ var dl = require('datalib'),
     Tuple = df.Tuple,
     Deps = df.Dependencies,
     Transform = vg.Transform,
-    sg = require('../model/signals');
+    sg = require('../ctrl/signals');
 
 /**
  * @classdesc Represents the BubbleCursor, a Vega data transformation operator.
@@ -88,7 +88,7 @@ BubbleCursor.prototype.transform = function(input) {
     // If backing data has coords, use those. Otherwise, use the cousin's bounds.
     if (dl.isValid(cousins[0].datum.x)) {
       cache.push.apply(cache, cousins.map(function(i) {
-        var d = i.datum;
+        var d = dl.duplicate(i.datum);
         d.x += offset.x;
         d.y += offset.y;
         return d;
@@ -97,8 +97,7 @@ BubbleCursor.prototype.transform = function(input) {
       cache.push.apply(cache, cousins.reduce(function(acc, i) {
         var b = i.bounds || i.mark.bounds;
         return acc.concat([
-          {x: b.x1, y: b.y1}, {x: b.x2, y: b.y1},
-          {x: b.x1, y: b.y2}, {x: b.x2, y: b.y2}
+          {x: b.x1, y: b.y1}, {x: b.x2, y: b.y1}, {x: b.x2, y: b.y2}
         ].map(Tuple.ingest));
       }, []));
     }

@@ -3,184 +3,131 @@ var d3 = require('d3'),
     dl = require('datalib'),
     React = require('react'),
     ReactDOM = require('react-dom'),
-    Parse = require('../mixins/Parse'),
-    model = require('../../model'),
-    lookup = model.lookup,
-    sg = require('../../model/signals');
+    connect = require('react-redux').connect,
+    Immutable = require('immutable'),
+    getInVis = require('../../util/immutable-utils').getInVis,
+    dsUtil = require('../../util/dataset-utils'),
+    assets = require('../../util/assets'),
+    Icon = require('../Icon'),
+    HoverField = require('./HoverField'),
+    HoverValue = require('./HoverValue'),
+    TransformList = require('./transforms/TransformList').connected;
+
+function mapStateToProps(state, ownProps) {
+  var id = ownProps.id;
+  return {
+    dataset: getInVis(state, 'datasets.' + id),
+    vega: state.get('vega')
+  };
+}
 
 var DataTable = React.createClass({
-  mixins: [Parse],
-
+  propTypes: {
+    id: React.PropTypes.number,
+    dataset: React.PropTypes.instanceOf(Immutable.Map)
+  },
   getInitialState: function() {
     return {
       limit: 20,
-      page:  0,
-      fullField: null,
-      fullValue: null
+      page: 0,
+      hoverField: null,
+      hoverValue: null
     };
   },
 
   componentDidMount: function() {
-    var el = this._el = d3.select(ReactDOM.findDOMNode(this));
+    var el = d3.select(ReactDOM.findDOMNode(this));
+    this.$table = el.select('.datatable');
+  },
 
-    this._table = el.select('.datatable');
-    this._fullField = el.select('.full.field');
-    this._fullValue = el.select('.full.value');
+  shouldComponentUpdate: function(nextProps, nextState) {
+    var vega = nextProps.vega;
+    return !vega.get('invalid') && !vega.get('isParsing');
   },
 
   prevPage: function() {
-    var node = this._table.node();
+    var node = this.$table.node();
     this.setState({page: --this.state.page});
     node.scrollLeft = 0;
   },
 
   nextPage: function() {
-    var node = this._table.node();
+    var node = this.$table.node();
     this.setState({page: ++this.state.page});
     node.scrollLeft = 0;
   },
 
-  showFullField: function(evt) {
-    var target = evt.target,
-        name = target.textContent,
-        schema = this.props.dataset.schema();
-
-    this.hideFull(evt);
-    this.setState({fullField: schema[name]});
-    this._fullField.style('display', 'block')
-      .style('top', target.offsetTop);
+  showHoverField: function(evt) {
+    var target = evt.target;
+    this.setState({
+      hoverField: {name: target.textContent, offsetTop: target.offsetTop},
+      hoverValue: null
+    });
   },
 
-  showFullValue: function(evt) {
-    var target = d3.select(evt.target),
-        node = target.node(),
-        field = node.parentNode.firstChild,
-        fieldRect = field.getBoundingClientRect(),
-        table = this._table.node(),
-        left = field.offsetLeft + fieldRect.width;
-
-    this.hideFull(evt);
-    this.setState({fullValue: target.text()});
-    this._fullValue.classed('odd', target.classed('odd'))
-      .classed('even', target.classed('even'))
-      .style('display', 'block')
-      .style('left', node.offsetLeft - table.scrollLeft + left)
-      .style('top', field.offsetTop);
+  showHoverValue: function(evt) {
+    this.setState({
+      hoverField: null,
+      hoverValue: (evt.persist(), evt)
+    });
   },
 
-  hideFull: function(evt) {
-    this.setState({fullField: null, fullValue: null});
-    this._fullField.style('display', 'none');
-    this._fullValue.style('display', 'none');
-  },
-
-  handleDragStart: function(evt) {
-    model.signal(sg.MODE, 'channels');
-    model.update();
-  },
-
-  handleDragOver: function(evt) {
-    if (evt.preventDefault) {
-      evt.preventDefault(); // Necessary. Allows us to drop.
-    }
-
-    return false;
-  },
-
-  handleDragEnd: function(evt) {
-    var sel = model.signal(sg.SELECTED),
-        cell = model.signal(sg.CELL),
-        fullField = this.state.fullField,
-        dropped = sel._id && cell._id,
-        prim;
-
-    try {
-      if (dropped) {
-        prim = lookup(sel.mark.def.lyra_id);
-        prim.bind(cell.key, fullField._id);
-      }
-    } catch (e) {}
-
-    model.signal(sg.MODE, 'handles')
-      .signal(sg.CELL, {});
-
-    if (dropped) {
-      this.parse(prim);
-    } else {
-      model.update();
-    }
-  },
-
-  handleDrop: function(evt) {
-    if (evt.preventDefault) {
-      evt.preventDefault(); // Necessary. Allows us to drop.
-    }
-
-    return false;
+  hideHover: function(evt) {
+    this.setState({hoverField: null, hoverValue: null});
   },
 
   render: function() {
     var state = this.state,
         props = this.props,
-        page = state.page,
+        page  = state.page,
         limit = state.limit,
         start = page * limit,
-        stop = start + limit,
-        dataset = props.dataset,
-        schema = dataset.schema(),
-        output = dataset.output(),
+        stop  = start + limit,
+        id = props.id,
+        schema = id ? props.dataset.get('_schema').toJS() : props.schema,
+        output = id ? dsUtil.output(id) : props.values,
         values = output.slice(start, stop),
         keys = dl.keys(schema),
         max = output.length,
         fmt = dl.format.auto.number(),
-        fullField = state.fullField,
-        fullValue = state.fullValue;
+        scrollLeft = this.$table && this.$table.node().scrollLeft;
 
-    var typeIcons = {
-      nominal: 'font', ordinal: 'font',
-      quantitative: 'hashtag', temporal: 'calendar'
-    };
+    var prev = page > 0 ? (
+      <Icon glyph={assets.prev} width="10" height="10" onClick={this.prevPage} />
+    ) : null;
 
-    var prev = page > 0 ?
-          <i className="fa fa-arrow-left" onClick={this.prevPage}></i> : null,
-        next = page + 1 < max / limit ?
-          <i className="fa fa-arrow-right" onClick={this.nextPage}></i> : null;
-
-    fullField = fullField ? (
-      <span>
-        <i className={'fa fa-' + typeIcons[fullField._type]}></i> {fullField._name}
-      </span>
-      ) : null;
+    var next = page + 1 < max / limit ? (
+      <Icon glyph={assets.next} width="10" height="10" onClick={this.nextPage} />
+    ) : null;
 
     return (
       <div>
+
+        <TransformList dsId={id} />
+
         <div className="datatable"
-          onMouseLeave={this.hideFull} onScroll={this.hideFull}>
-          <table><tbody>
-            {keys.map(function(k) {
-              return (
-                <tr key={k}>
-                  <td className={'field ' + props.className}
-                    onMouseOver={this.showFullField}>{k}</td>
-                  {values.map(function(v, i) {
-                    return (
-                      <td key={v._id} className={i % 2 ? 'even' : 'odd'}
-                        onMouseOver={this.showFullValue}>{v[k]}</td>
-                    );
-                  }, this)}
-                </tr>
-              );
-            }, this)}
-          </tbody></table>
+          onMouseLeave={this.hideHover} onScroll={this.hideHover}>
 
-          <div className={'full field ' + props.className}
-            draggable={true}
-            onDragStart={this.handleDragStart}
-            onDragOver={this.handleDragOver}
-            onDragEnd={this.handleDragEnd}
-            onDrop={this.handleDrop}>{fullField}</div>
-
-          <div className="full value">{fullValue}</div>
+          <table>
+            <tbody>
+              {keys.map(function(k) {
+                return (
+                  <tr key={k}>
+                    <td className={'field ' + (schema[k].source ? 'source' : 'derived')}
+                      onMouseOver={this.showHoverField}>{k}</td>
+                    {values.map(function(v, i) {
+                      return (
+                        <td key={k + i} className={i % 2 ? 'even' : 'odd'}
+                          onMouseOver={this.showHoverValue}>{v[k]}</td>
+                      );
+                    }, this)}
+                  </tr>
+                );
+              }, this)}
+            </tbody>
+          </table>
+          {id ? <HoverField dsId={id} schema={schema} def={state.hoverField} /> : null}
+          <HoverValue event={state.hoverValue} scrollLeft={scrollLeft} />
         </div>
 
         <div className="paging">
@@ -193,4 +140,4 @@ var DataTable = React.createClass({
 
 });
 
-module.exports = DataTable;
+module.exports = connect(mapStateToProps)(DataTable);

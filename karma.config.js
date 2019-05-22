@@ -3,6 +3,7 @@
 'use strict';
 var argv = require('yargs').argv;
 var path = require('path');
+var webpack = require('webpack');
 
 module.exports = function(config) {
   config.set({
@@ -10,7 +11,7 @@ module.exports = function(config) {
 
     singleRun: !argv.watch, // just run once by default
 
-    frameworks: ['mocha'],
+    frameworks: ['mocha', 'source-map-support'],
 
     // npm i karma-spec-reporter --save-dev
     // displays tests in a nice readable format
@@ -56,6 +57,25 @@ module.exports = function(config) {
             query: {
               presets: ['react']
             }
+          },
+          // Do not parse images or SCSS in the test bundle
+          {
+            test: /\.scss$/,
+            loader: 'raw-loader'
+          },
+          {
+            test: /\.png$/,
+            loader: 'raw-loader'
+          },
+          {
+            include: [
+              path.resolve(__dirname, 'src/assets')
+            ],
+            loader: 'raw-loader'
+          },
+          {
+            test: /\.json$/,
+            loader: 'json-loader'
           }
         ],
         // instrument only testing sources with Istanbul
@@ -69,10 +89,17 @@ module.exports = function(config) {
         ]
       },
 
+      plugins: [
+        // Do not pull the root index file into the test bundle: it is designed
+        // to kick off the app, which isn't relevant in a testing context
+        new webpack.IgnorePlugin(/js\/index.js$/)
+      ],
+
       // required for enzyme to work properly
       externals: {
         'jsdom': 'window',
         'cheerio': 'window',
+        'react/addons': true,
         'react/lib/ExecutionEnvironment': true,
         'react/lib/ReactContext': 'window'
       },
@@ -92,8 +119,9 @@ module.exports = function(config) {
       'karma-ie-launcher',
       'karma-phantomjs-launcher',
       'karma-safari-launcher',
-      'karma-spec-reporter',
-      'karma-sourcemap-loader'
+      'karma-source-map-support',
+      'karma-sourcemap-loader',
+      'karma-spec-reporter'
     ],
 
     customLaunchers: {

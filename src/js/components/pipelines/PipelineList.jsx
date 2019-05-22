@@ -1,32 +1,32 @@
 'use strict';
 var React = require('react'),
+    Immutable = require('immutable'),
+    connect = require('react-redux').connect,
+    getInVis = require('../../util/immutable-utils').getInVis,
     PipelineInspector = require('./PipelineInspector');
 
-var PipelineList = React.createClass({
-  getInitialState: function() {
-    return {selected: 0};
-  },
+function mapStateToProps(reduxState) {
+  return {
+    pipelines: getInVis(reduxState, 'pipelines')
+  };
+}
 
-  select: function(id) {
-    this.setState({selected: id});
+var PipelineList = React.createClass({
+  propTypes: {
+    pipelines: React.PropTypes.instanceOf(Immutable.Map)
   },
 
   render: function() {
+    var pipelines = this.props.pipelines.keySeq().toArray();
+
     return (
       <div id="pipeline-list">
-        <h2>Data Pipelines <i className="fa fa-plus"></i></h2>
-        {this.props.pipelines.map(function(p) {
-          return (
-            <PipelineInspector
-              key={p._id}
-              pipeline={p}
-              select={this.select.bind(this, p._id)}
-              isSelected={this.state.selected === p._id} />
-          );
-        }, this)}
+        {pipelines.map(function(id) {
+          return (<PipelineInspector key={id} id={id} />);
+        })}
       </div>
     );
   }
 });
 
-module.exports = PipelineList;
+module.exports = connect(mapStateToProps)(PipelineList);

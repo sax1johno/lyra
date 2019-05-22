@@ -1,10 +1,14 @@
 'use strict';
 var React = require('react'),
-    ReactDOM = require('react-dom'),
-    SignalValueMixin = require('./mixins/SignalValue');
+    ReactDOM = require('react-dom');
 
 var ContentEditable = React.createClass({
-  mixins: [SignalValueMixin],
+  propTypes: {
+    value: React.PropTypes.oneOfType([
+      React.PropTypes.string, React.PropTypes.number
+    ]),
+    save: React.PropTypes.func
+  },
 
   getInitialState: function() {
     return {edit: false};
@@ -14,14 +18,14 @@ var ContentEditable = React.createClass({
     this._el = ReactDOM.findDOMNode(this);
   },
 
-  componentWillUnmount: function() {
-    this._el = null;
-  },
-
   componentDidUpdate: function() {
     if (this.state.edit) {
       this._el.focus();
     }
+  },
+
+  componentWillUnmount: function() {
+    this._el = null;
   },
 
   start: function() {
@@ -30,24 +34,15 @@ var ContentEditable = React.createClass({
 
   stop: function() {
     this.setState({edit: false});
-    var obj = this.props.obj;
-    if (!obj) {
-      return;
-    }
-
-    var Sidebars = require('./');
-    if (Sidebars.state.selected === obj._id) {
-      Sidebars.refs.inspector.forceUpdate();
+    if (this.props.save) {
+      this.props.save(this._el.textContent.trim());
     }
   },
 
-  handleInput: function() {
-    this.setValue(this._el.textContent.trim());
-  },
-
+  // On enter press, commit the change by triggering blur.
   handleEnter: function(evt) {
     if (!evt.keyCode || (evt.keyCode && evt.keyCode === 13)) {
-      this.stop();
+      this._el.blur();
     }
   },
 
@@ -59,10 +54,9 @@ var ContentEditable = React.createClass({
         contentEditable={this.state.edit}
         onClick={props.onClick || this.start}
         onDoubleClick={props.onDoubleClick || this.start}
-        onInput={this.handleInput}
         onBlur={this.stop}
         onKeyDown={this.handleEnter}>
-          {this.state.value}
+          {props.value}
       </div>
     );
   }

@@ -43,7 +43,6 @@ rules:
   accessor-pairs: 2
   block-scoped-var: 2
   complexity: 0
-  consistent-return: 2
   curly:
     - 2
     - all
@@ -73,7 +72,12 @@ rules:
   no-labels: 0
   no-lone-blocks: 2
   no-loop-func: 2
-  no-multi-spaces: 2
+  no-multi-spaces:
+    - 2
+    - exceptions:
+        Property: true
+        VariableDeclarator: true
+        ImportDeclaration: true
   no-multi-str: 2
   no-native-reassign: 2
   no-new-func: 0
@@ -122,12 +126,14 @@ rules:
   no-shadow: 2
   no-undef-init: 2
   no-undef: 2
-  no-undefined: 2
+  no-undefined: 0
   no-unused-vars:
     - 2
     - vars: all
       args: none
-  no-use-before-define: 2
+  no-use-before-define:
+    - 2
+    - nofunc
 
   # Stylistic Issues
 
@@ -172,6 +178,7 @@ rules:
     - 2
     - beforeColon: false
       afterColon: true
+      mode: minimum
   lines-around-comment:
     - 2
     - beforeBlockComment: true
@@ -187,6 +194,20 @@ rules:
     - 2
     - newIsCap: true
       capIsNew: true
+      capIsNewExceptions:
+        # Lyra primitive factories
+        - Area
+        - Group
+        - Line
+        - Mark
+        - Rect
+        - Scene
+        - Symbol
+        - Text
+        - Dataset
+        - Guide
+        - Pipeline
+        - Scale
   new-parens: 0
   newline-after-var: 0
   no-array-constructor: 2
@@ -217,7 +238,7 @@ rules:
   quote-props:
     - 2
     - as-needed
-    - {keywords: false}
+    - {keywords: false, numbers: true}
   quotes:
     - 2
     - single

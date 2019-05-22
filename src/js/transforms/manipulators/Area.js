@@ -1,11 +1,10 @@
 'use strict';
 var inherits = require('inherits'),
-    Base = require('./Manipulators'),
-    spec = require('../../model/primitives/marks/manipulators'),
-    map = require('../../util/map-manipulator'),
+    Manipulators = require('./Manipulators'),
+    spec = require('../../ctrl/manipulators'),
+    annotate = require('../../util/annotate-manipulators'),
     CONST = spec.CONST,
-    PX = CONST.PADDING,
-    SP = CONST.STROKE_PADDING;
+    PAD = CONST.PADDING;
 
 /**
  * @classdesc Represents the AreaManipulators, a Vega data transformation operator.
@@ -19,10 +18,10 @@ var inherits = require('inherits'),
  * @constructor
  */
 function AreaManipulators(graph) {
-  return Base.call(this, graph);
+  return Manipulators.call(this, graph);
 }
 
-inherits(AreaManipulators, Base);
+inherits(AreaManipulators, Manipulators);
 
 AreaManipulators.prototype.handles = function(item) {
   var bounds = item.mark.bounds;
@@ -40,21 +39,46 @@ AreaManipulators.prototype.connectors = function(item) {
 };
 
 AreaManipulators.prototype.channels = function(item) {
-  var b = item.mark.bounds,
+  var b  = item.mark.bounds,
       gb = item.mark.group.bounds,
+      path = item.mark.items[0].pathCache,
       c = spec.coords(b),
       m = c.midCenter;
+
+  path = path.map(function(d) {
+    return d.join(' ');
+  }).join(' ');
+
+  console.log(path);
 
   return []
     // x
     .concat([
-      {x: gb.x1, y: m.y}, {x: m.x - PX, y: m.y}
-    ].map(map('x', 'span')))
+      {x: gb.x1, y: item.y}, {x: item.x - PAD, y: item.y}
+    ].map(annotate('x', 'span')))
     // y
     .concat([
-      {x: m.x, y: gb.y1}, {x: m.x, y: m.y - SP}
-    ].map(map('y', 'span')));
+      {x: item.x, y: gb.y1}, {x: item.x, y: item.y - PAD}
+    ].map(annotate('y', 'span')))
+    // stroke
+    .concat([
+      {x: m.x, y: m.y, path: path}
+    ].map(annotate('fill', 'border')));
 };
 
-AreaManipulators.prototype.altchannels = AreaManipulators.prototype.channels;
+AreaManipulators.prototype.altchannels = function(item) {
+  var b  = item.mark.bounds,
+      c = spec.coords(b),
+      m = c.midCenter,
+      path = item.mark.items[0].pathCache;
+
+  path = path.map(function(d) {
+    return d.join(' ');
+  }).join(' ');
+
+  return [
+    {x: m.x, y: m.y, path: path}
+  ].map(annotate('stroke', 'border'));
+};
+
 module.exports = AreaManipulators;

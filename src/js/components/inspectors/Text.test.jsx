@@ -9,7 +9,7 @@ var Property = require('./Property');
 var wrapper;
 
 // this is shallow rendered tested since all the work is done in property.js
-describe('Text Inspector <Text/> (shallow)', function() {
+describe.skip('Text Inspector <Text/> (shallow)', function() {
   beforeEach(function() {
     var mock = {
       properties: {
@@ -59,9 +59,9 @@ describe('Text Inspector <Text/> (shallow)', function() {
       'text',
       'x',
       'y'
-    ].forEach(function( prop ) {
+    ].forEach(function(prop) {
       // @TODO: "name" is not the right property to inspect, but unless we
-      // refactor <Property> to take a single field prop the name's the only
+      // refactor <Property> to take a single field prop, the name's the only
       // attribute of the nested components that we can inspect.
       expect(wrapper.find('[name="' + prop + '"]')).to.have.length(1);
     });

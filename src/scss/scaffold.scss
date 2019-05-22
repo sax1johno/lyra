@@ -1,0 +1,77 @@
+// Body
+
+body {
+  background: $bg-color;
+  font-family: Lato, Helvetica Neue, Helvetica, Arial;
+  font-size: 12px;
+  overflow-y: hidden;
+}
+
+// The two main sections of our app
+// Sidebar is where the react components are placed
+.sidebar-container{
+  width: $sidebars-width;
+  position: relative;
+  height: 100%;
+}
+
+// Vis-container is where vega is placed
+.vis-container {
+  position: absolute;
+  display: block;
+  left: $sidebars-width;
+  right: 0;
+  top: 60px;
+  bottom: 0;
+  overflow: auto;
+
+
+  #vis {
+    margin: 0 2*$outer-padding 2*$outer-padding;
+
+    canvas {
+      border: 1px solid #ccc;
+      box-shadow: 2px 2px 17px 0px rgba(0,0,0,0.15)
+    }
+  }
+}
+
+// each vertical sidebar
+.sidebar {
+  float: left;
+  position: relative;
+  z-index: 999;
+  height: 100%;
+  overflow-y: scroll;
+  background-color: $bg-color;
+  box-sizing: border-box;
+
+  h2 {
+    padding: 10px;
+  }
+}
+
+#visual-sidebar {
+  display: flex;
+  flex-flow: column;
+  width: $visual-sidebar-width;
+  background-color: $vlgrey-bg;
+  border-right: 1px solid $lgrey-bg;
+}
+
+#inspector {
+  width: $inspector-width;
+  background-color: $lblue-bg;
+}
+
+#pipeline-sidebar {
+  width: $pipeline-sidebar-width;
+  background-color: $dblue-bg;
+}
+
+.tooltip {
+  font-size: 11px !important;
+  padding: $inner-padding $outer-padding !important;
+  border-radius: $border-radius !important;
+  line-height: 1.3em !important;
+}

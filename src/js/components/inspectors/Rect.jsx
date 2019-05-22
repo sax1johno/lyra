@@ -1,50 +1,53 @@
 'use strict';
+
 var React = require('react'),
     Property = require('./Property'),
-    ExtentProperty = require('./ExtentProperty');
+    ExtentProperty = require('./ExtentProperty'),
+    primTypes = require('../../constants/primTypes');
 
-var Rect = React.createClass({
+var RectInspector = React.createClass({
+  propTypes: {
+    primId: React.PropTypes.number.isRequired,
+    primType: primTypes.isRequired
+  },
   render: function() {
-    var props = this.props,
-        primitive = props.primitive,
-        update = primitive.properties.update;
-
+    var props = this.props;
     return (
       <div>
-        <h3>X Position</h3>
+        <div className="property-group">
+          <h3>X Position</h3>
 
-        <ExtentProperty type="x" {...props} />
+          <ExtentProperty exType="x" {...props} />
+        </div>
 
-        <h3>Y Position</h3>
+        <div className="property-group">
+          <h3>Y Position</h3>
 
-        <ExtentProperty type="y" {...props} />
+          <ExtentProperty exType="y" {...props} />
+        </div>
 
-        <h3>Fill</h3>
+        <div className="property-group">
+          <h3>Fill</h3>
 
-        <Property name="fill" label="Color"
-          type="color" primitive={primitive} canDrop={true}
-          scale={update.fill.scale} field={update.fill.field}
-          signal={update.fill.signal} />
+          <Property name="fill" label="Color" type="color"
+            canDrop={true} {...props} />
 
-        <Property name="fillOpacity" label="Opacity" primitive={primitive}
-          type="range" canDrop={true} min="0" max="1" step="0.05"
-          scale={update.fillOpacity.scale} field={update.fillOpacity.field}
-          signal={update.fillOpacity.signal} />
+          <Property name="fillOpacity" label="Opacity" type="range"
+            min="0" max="1" step="0.05" canDrop={true} {...props} />
+        </div>
 
-        <h3>Stroke</h3>
+        <div className="property-group">
+          <h3>Stroke</h3>
 
-        <Property name="stroke" label="Color"
-          type="color" primitive={primitive} canDrop={true}
-          scale={update.stroke.scale} field={update.stroke.field}
-          signal={update.stroke.signal} />
+          <Property name="stroke" label="Color" type="color"
+            canDrop={true} {...props} />
 
-        <Property name="strokeWidth" label="Width" primitive={primitive}
-          type="range" canDrop={true} min="0" max="10" step="0.25"
-          scale={update.strokeWidth.scale} field={update.strokeWidth.field}
-          signal={update.strokeWidth.signal} />
+          <Property name="strokeWidth" label="Width" type="range"
+            min="0" max="10" step="0.25" canDrop={true} {...props} />
+        </div>
       </div>
     );
   }
 });
 
-module.exports = Rect;
+module.exports = RectInspector;

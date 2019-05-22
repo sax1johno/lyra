@@ -1,17 +1,12 @@
 $pipeline-width: 180px;
 
-#pipeline-list {
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  left: $inspector-width;
-  width: $pipeline-list-width - 2*$outer-padding;
-  padding: $outer-padding;
-  overflow: auto;
-  background-color: $dblue-bg;
-
+#pipeline-sidebar {
   h2 {
     color: #fff;
+
+    svg {
+      fill: #fff;
+    }
   }
 }
 
@@ -20,7 +15,7 @@ $pipeline-width: 180px;
   background-color: $lblue-bg;
   width: $pipeline-width - 2*$inner-padding;
   padding: $inner-padding;
-  margin-bottom: $margin;
+  margin: 0 auto $margin auto;
 
   border-radius: $border-radius;
 
@@ -33,13 +28,15 @@ $pipeline-width: 180px;
   }
 
   p.source {
+    display: flex;
+    align-items: center;
     margin: $margin (-$inner-padding);
     padding: $inner-padding;
     background: $lgrey-bg;
     border-top: 1px solid $lgrey-border;
     border-bottom: 1px solid $lgrey-border;
 
-    i { margin-right: $inner-padding; }
+    .icon { margin-right: $inner-padding; }
   }
 
   &.selected {
@@ -53,6 +50,7 @@ $pipeline-width: 180px;
 .datatable {
   $cell-width: 55px;
   $cell-padding: 3px;
+  $menu-offset: 22px; // calculate cell height
   $mw: $cell-width - $cell-padding;
 
   /* Req'd to prevent Chrome scrolling .field for some reason */
@@ -91,20 +89,20 @@ $pipeline-width: 180px;
     border-color: #ddd;
   }
 
+  .aggregates-list,
   .full {
     display: none;
     position: absolute;
     min-width: $mw;
     width: auto;
-    padding: 5px $cell-padding;
     vertical-align: middle;
+  }
+
+  .full {
+    padding: 5px $cell-padding;
 
     &.field {
       left: $inner-padding;
-
-      i {
-        margin-right: $inner-padding;
-      }
     }
 
     &.value {
@@ -112,6 +110,36 @@ $pipeline-width: 180px;
       border-style: solid;
       border-left: 1px solid transparent;
       pointer-events: none;
+    }
+
+    .icon {
+      cursor: pointer;
+      margin-right: $inner-padding;
+
+      &:last-child { margin-right: 0; }
+    }
+
+    .fieldName {
+      margin-right: $inner-padding;
+    }
+  }
+
+  .aggregates-list {
+    top: 0;
+    left: $inner-padding;
+    margin: $menu-offset 0;
+    box-shadow: 0px 6px 12px rgba(0,0,0,.175);
+    z-index: 5000;
+
+    .full {
+      display: block;
+      position: relative;
+      left: 0;
+
+      &.more {
+        cursor: pointer;
+        font-style: italic;
+      }
     }
   }
 }
@@ -129,12 +157,151 @@ $pipeline-width: 180px;
     }
   }
 
-  i {
+  .icon {
     cursor: pointer;
     opacity: 0.6;
 
     &:hover {
       opacity: 1;
+    }
+  }
+}
+
+.transform-list {
+  display: flex;
+  flex-wrap: wrap;
+  margin-bottom: $outer-padding;
+
+  .transform-button {
+    display: inline-block;
+    padding: $inner-padding;
+    cursor: pointer;
+    background: $lgrey-bg;
+    border: 1px solid $lgrey-border;
+    border-radius: $border-radius;
+    margin-right: $inner-padding;
+  }
+
+  .transform-inspector {
+    width: 100%;
+    margin: $outer-padding 0;
+    border-top: 1px solid $lgrey-bg;
+    border-bottom: 1px solid $lgrey-bg;
+
+    &:first-child { margin-top: 0; }
+    &:last-child { margin-bottom: 0; }
+  }
+}
+
+.pipelineModal {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+
+  .closeModal {
+    top: $inner-padding;
+    right: $inner-padding;
+  }
+
+  .examples, .load {
+    flex: 1;
+    padding: 0 2*$inner-padding;
+    height: 300px;
+    overflow: auto;
+  }
+
+  .load h2 {
+    margin: 2*$margin 0;
+  }
+
+  .examples h2 {
+    margin: 2*$margin 0;
+    margin-bottom: $margin;
+  }
+
+  .examples li {
+    padding: $outer-padding;
+    cursor: pointer;
+    border-radius: $border-radius;
+
+    &:hover {
+      background: $lblue-bg;
+    }
+
+    &.selected {
+      background: $lyellow-bg;
+    }
+  }
+
+  .example-name {
+    display: block;
+    font-weight: bold;
+    font-size: 14px;
+    color: $dblue-bg;
+    margin-bottom: $inner-padding;
+  }
+
+  abbr {
+    font-variant: small-caps;
+    font-size: 1.3em;
+  }
+
+  form {
+    margin: $margin 0;
+
+    input[type=text] {
+      margin-right: $inner-padding;
+      width: 195px;
+    }
+  }
+
+  textarea {
+    font-family: monospace;
+  }
+
+  .textarea-dnd,
+  input[type="text"] {
+    border: 1px solid;
+    border-radius: 3px;
+    font-size: 100%;
+    padding: .5em 1em;
+    border-color: $lgrey-border;
+  }
+
+  .textarea-dnd {
+    &.active {
+      background-color: $lblue-bg;
+      border-color: $mblue-bg;
+    }
+  }
+
+  input[type="text"] {
+    line-height: normal;
+    margin-top: 5px;
+  }
+
+  .error-message, .success-message {
+    width: 100%;
+    margin: 2 * $margin;
+    margin-top: 0;
+    margin-bottom: $margin;
+  }
+
+  .preview {
+    position: relative;
+    margin: 0 2 * $margin;
+    width: 520px;
+
+    h2 {
+      align-items: flex-start;
+      justify-content: flex-start;
+      margin-bottom: $margin;
+    }
+
+    .datatable td.field, .datatable .full.field { left: 0; }
+
+    button {
+      margin: $margin 0;
     }
   }
 }

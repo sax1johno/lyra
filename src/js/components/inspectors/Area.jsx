@@ -1,114 +1,69 @@
 'use strict';
 var React = require('react'),
     Property = require('./Property'),
-    AreaProperty = require('./AreaProperty'),
-    Base = require('../../model/primitives/marks/Area');
+    primTypes = require('../../constants/primTypes'),
+    INTERPOLATE = require('../../constants/interpolate');
 
-var Area = React.createClass({
+var AreaInspector = React.createClass({
+  propTypes: {
+    primId: React.PropTypes.number.isRequired,
+    primType: primTypes.isRequired
+  },
   render: function() {
-    var props = this.props,
-        primitive = props.primitive,
-        update = primitive.properties.update;
-
+    var props = this.props;
     return (
       <div>
-        <h3>X Position</h3>
+        {/* <div className="property-group">
+          <h3>Orientation</h3>
 
-        <AreaProperty type="x" {...props} />
+          <Property name="orient" label="Orient" type="select"
+            opts={Area.ORIENT} {...props} />
+        </div>*/}
 
-        <h3>Y Position</h3>
+        <Property name="x" type="number" canDrop={true} {...props}>
+          <h3 className="label">X Position</h3>
+        </Property>
 
-        <AreaProperty type="y" {...props} />
+        <div className="property-group">
+          <h3>Y Position</h3>
 
-        <h3>Fill</h3>
+          <Property name="y" label="Start" type="number" canDrop={true} {...props} />
 
-        <Property
-          name="fill"
-          label="Color"
-          type="color"
-          primitive={primitive}
-          canDrop={true}
-          scale={update.fill.scale}
-          field={update.fill.field}
-          signal={update.fill.signal} />
+          <Property name="y2" label="End" type="number" canDrop={true} {...props} />
+        </div>
 
-        <Property
-          name="fillOpacity"
-          label="Opacity"
-          primitive={primitive}
-          type="range"
-          canDrop={true}
-          min="0" max="1"
-          step="0.05"
-          scale={update.fillOpacity.scale}
-          field={update.fillOpacity.field}
-          signal={update.fillOpacity.signal} />
+        <div className="property-group">
+          <h3>Fill</h3>
 
-        <h3>Stroke</h3>
+          <Property name="fill" label="Color" type="color"
+            canDrop={true} {...props} />
 
-        <Property
-          name="stroke"
-          label="Color"
-          type="color"
-          primitive={primitive}
-          canDrop={true}
-          scale={update.stroke.scale}
-          field={update.stroke.field}
-          signal={update.stroke.signal}
-        />
+          <Property name="fillOpacity" label="Opacity" type="range"
+            min="0" max="1" step="0.05" canDrop={true} {...props} />
+        </div>
 
-        <Property
-          name="strokeWidth"
-          label="Width"
-          primitive={primitive}
-          type="range"
-          canDrop={true}
-          min="0"
-          max="10"
-          step="0.25"
-          scale={update.strokeWidth.scale}
-          field={update.strokeWidth.field}
-          signal={update.strokeWidth.signal}
-        />
+        <div className="property-group">
+          <h3>Stroke</h3>
 
-        <h3>Line Strength</h3>
-        <Property
-          name="interpolate"
-          label="Interpolate"
-          primitive={primitive}
-          type="select"
-          opts={Base.INTERPOLATE}
-          canDrop={true}
-          scale={update.interpolate.scale}
-          field={update.interpolate.field}
-          signal={update.interpolate.signal}
-        />
+          <Property name="stroke" label="Color" type="color"
+            canDrop={true} {...props} />
 
-        <Property
-          name="tension"
-          label="Tension"
-          type="number"
-          primitive={primitive}
-          canDrop={true}
-          scale={update.tension.scale}
-          field={update.tension.field}
-          signal={update.tension.signal}
-          />
-        <h3>Orientation</h3>
-        <Property
-          name="orient"
-          label="Orient"
-          primitive={primitive}
-          type="select"
-          opts={Base.ORIENT}
-          canDrop={true}
-          scale={update.orient.scale}
-          field={update.orient.field}
-          signal={update.orient.signal}
-        />
+          <Property name="strokeWidth" label="Width" type="range"
+            min="0" max="10" step="0.25" canDrop={true} {...props} />
+        </div>
+
+        <div className="property-group">
+          <h3>Line Strength</h3>
+
+          <Property name="interpolate" label="Interpolate" type="select"
+            opts={INTERPOLATE} canDrop={true} {...props} />
+
+          <Property name="tension" label="Tension" type="number"
+            canDrop={true} {...props} />
+        </div>
       </div>
     );
   }
 });
 
-module.exports = Area;
+module.exports = AreaInspector;

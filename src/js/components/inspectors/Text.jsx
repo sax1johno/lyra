@@ -1,146 +1,119 @@
 'use strict';
 var React = require('react'),
     Property = require('./Property'),
-    Base = require('../../model/primitives/marks/Text');
+    primTypes = require('../../constants/primTypes'),
+    connect = require('react-redux').connect,
+    updateMarkProperty = require('../../actions/markActions').updateMarkProperty,
+    Text = require('../../store/factory/marks/Text'),
+    assets = require('../../util/assets'),
+    getInVis = require('../../util/immutable-utils').getInVis;
 
-var Text = React.createClass({
+function mapStateToProps(reduxState, ownProps) {
+  return {
+    dsId: getInVis(reduxState, 'marks.' + ownProps.primId + '.from.data')
+  };
+}
+
+function mapDispatchToProps(dispatch, ownProps) {
+  return {
+    updateTemplate: function(value) {
+      var val = value.target ? value.target.value : value;
+      dispatch(updateMarkProperty(ownProps.primId,
+        'properties.update.text.template', val));
+    }
+  };
+}
+
+var TextInspector = React.createClass({
+  propTypes: {
+    primId: React.PropTypes.number.isRequired,
+    primType: primTypes.isRequired,
+    autoVal: React.PropTypes.string
+  },
+
   render: function() {
     var props = this.props,
-        primitive = props.primitive,
-        update = primitive.properties.update;
+        dsId = props.dsId,
+        textLbl = (<h3 className="label">Text</h3>);
+
+    var textProp = dsId ? (
+      <Property name="text.template" type="autocomplete" autoType="tmpl"
+        dsId={dsId} onChange={props.updateTemplate} {...props}>
+        {textLbl}
+      </Property>
+    ) : (
+      <Property name="text.template" type="text"
+        onChange={props.updateTemplate} {...props}>
+        {textLbl}
+      </Property>
+    );
 
     return (
       <div>
-        <h3>Text</h3>
+        <div className="property-group">
+          {textProp}
+        </div>
 
-        <Property name="text" label="Text"
-          type="text"
-          primitive={primitive}
-          canDrop={true}
-          scale={update.text.scale}
-          field={update.text.field}
-          signal={update.text.signal} />
+        <div className="property-group">
+          <h3>Font</h3>
 
-        <h3>Font</h3>
+          <Property name="font" label="Face" type="select"
+            opts={Text.fonts} canDrop={true} {...props} />
 
-        <Property name="font" label="Font"
-          primitive={primitive}
-          type="select"
-          opts={Base.fonts}
-          canDrop={true}
-          scale={update.font.scale}
-          field={update.font.field}
-          signal={update.font.signal} />
+          <Property name="fontSize" label="Size" type="number"
+            canDrop={true} {...props} />
 
-        <Property name="fontSize" label="Size"
-          type="number"
-          primitive={primitive}
-          canDrop={true}
-          scale={update.fontSize.scale}
-          field={update.fontSize.field}
-          signal={update.fontSize.signal} />
+          <Property name="fontWeight" label="Weight" type="toggle"
+            glyph={assets.bold} opts={Text.fontWeights}
+            canDrop={true} {...props} />
 
-        <Property name="fontWeight" label="Weight"
-          primitive={primitive}
-          type="select"
-          opts={Base.fontWeights}
-          canDrop={true}
-          scale={update.fontWeight.scale}
-          field={update.fontWeight.field}
-          signal={update.fontWeight.signal} />
+          <Property name="fontStyle" label="Style" type="toggle"
+            glyph={assets.italic} opts={Text.fontStyles}
+            canDrop={true} {...props} />
 
-        <Property name="fontStyle" label="Style"
-          primitive={primitive}
-          type="select"
-          opts={Base.fontStyles}
-          canDrop={true}
-          scale={update.fontStyle.scale}
-          field={update.fontStyle.field}
-          signal={update.fontStyle.signal} />
+          <Property name="fill" label="Color" type="color"
+            canDrop={true} {...props} />
 
-        <Property name="fill" label="Color"
-          type="color"
-          primitive={primitive}
-          canDrop={true}
-          scale={update.fill.scale}
-          field={update.fill.field}
-          signal={update.fill.signal} />
+          <Property name="fillOpacity" label="Opacity" type="range"
+            min="0" max="1" step="0.05" canDrop={true} {...props} />
+        </div>
 
-        <Property name="fillOpacity" label="Opacity"
-          type="range"
-          primitive={primitive}
-          canDrop={true}
-          min="0" max="1" step="0.05"
-          scale={update.fillOpacity.scale}
-          field={update.fillOpacity.field}
-          signal={update.fillOpacity.signal} />
+        <div className="property-group">
+          <h3>Position</h3>
 
-        <h3>Position</h3>
+          <Property name="x" label="X" type="number" canDrop={true} {...props} />
 
-        <Property name="x" label="X"
-          type="number"
-          primitive={primitive}
-          canDrop={true}
-          scale={update.x.scale}
-          field={update.x.field}
-          signal={update.x.signal} />
+          <Property name="y" label="Y" type="number" canDrop={true} {...props} />
+        </div>
 
-        <Property name="y" label="Y"
-          type="number"
-          primitive={primitive}
-          canDrop={true}
-          scale={update.y.scale}
-          field={update.y.field}
-          signal={update.y.signal} />
+        <div className="property-group">
+          <h3>Offset</h3>
 
-        <h3>Offset</h3>
+          <Property name="dx" label="X" type="number" canDrop={true} {...props} />
 
-        <Property name="dx" label="X"
-          type="number"
-          primitive={primitive}
-          canDrop={true}
-          scale={update.dx.scale}
-          field={update.dx.field}
-          signal={update.dx.signal} />
+          <Property name="dy" label="Y" type="number" canDrop={true} {...props} />
 
-        <Property name="dy" label="Y"
-          type="number"
-          primitive={primitive}
-          canDrop={true}
-          scale={update.dy.scale}
-          field={update.dy.field}
-          signal={update.dy.signal} />
+        </div>
 
-        <h3>Align</h3>
+        <div className="property-group">
+          <h3>Align</h3>
 
-        <Property name="align" label="Horizontal"
-          primitive={primitive}
-          type="select"
-          opts={Base.alignments}
-          canDrop={true}
-          scale={update.align.scale}
-          field={update.align.field}
-          signal={update.align.signal} />
+          <Property name="align" label="Horizontal" type="selection"
+            glyphs={[assets['align-left'],
+                     assets['align-center'], assets['align-right']]}
+            opts={Text.alignments} canDrop={true} {...props} />
 
-        <Property name="baseline" label="Vertical"
-          primitive={primitive}
-          type="select"
-          opts={Base.baselines}
-          canDrop={true}
-          scale={update.baseline.scale}
-          field={update.baseline.field}
-          signal={update.baseline.signal} />
+          <Property name="baseline" label="Vertical" type="selection"
+            glyphs={[assets['vertical-align-top'],
+                     assets['vertical-align-center'], assets['vertical-align-bottom']]}
+            opts={Text.baselines} canDrop={true} {...props} />
 
-        <Property name="angle" label="Rotation"
-          type="number"
-          primitive={primitive}
-          canDrop={true}
-          scale={update.angle.scale}
-          field={update.angle.field}
-          signal={update.angle.signal} />
+          <Property name="angle" label="Rotation" type="number"
+            canDrop={true} {...props} />
+        </div>
       </div>
     );
   }
 });
 
-module.exports = Text;
+module.exports = connect(mapStateToProps, mapDispatchToProps)(TextInspector);

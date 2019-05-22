@@ -9,7 +9,7 @@ var dl = require('datalib'),
     Deps = df.Dependencies,
     Transform = vg.Transform,
     Voronoi = vg.transforms.voronoi,
-    sg = require('../../model/signals'),
+    sg = require('../../ctrl/signals'),
     $x = dl.$('x'),
     $y = dl.$('y');
 
@@ -113,7 +113,9 @@ Manipulators.prototype.transform = function(input) {
     .param('x', 'x')
     .param('y', 'y')
     .param('clipExtent', clip)
-    .batchTransform(output, cache);
+    .batchTransform(output, cache.filter(function(x) {
+      return x._voronoi !== false || x._voronoi === undefined;
+    }));
 };
 
 /**
